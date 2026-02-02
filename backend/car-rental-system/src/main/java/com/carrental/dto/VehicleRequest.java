@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import org.springframework.web.multipart.MultipartFile;
 import lombok.Data;
 
 @Data
@@ -44,6 +45,8 @@ public class VehicleRequest {
 
 	private String description;
 
-	private String imageUrl;
+	private MultipartFile image;
+
+	private String imageUrl; // Keep for backward compatibility or when not updating image
 
 }

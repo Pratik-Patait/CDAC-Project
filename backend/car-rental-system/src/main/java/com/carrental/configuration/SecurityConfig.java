@@ -15,6 +15,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.Arrays;
+import java.util.Collections;
 
 import com.carrental.enums.UserRole;
 import com.carrental.security.JwtFilter;
@@ -34,11 +39,15 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 				// Disable CSRF for stateless APIs
-				.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(request -> request
+				.csrf(AbstractHttpConfigurer::disable)
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				.authorizeHttpRequests(request -> request
 						// Allow Public Access to Login and Register only
-						.requestMatchers("/api/auth/register", "/api/auth/login", "/swagger-ui/**", "/v3/api-docs/**",
+						.requestMatchers("/api/auth/register", "/api/auth/login", "/api/contact", "/swagger-ui/**",
+								"/v3/api-docs/**",
 								"/swagger-ui.html")
 						.permitAll()
+						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permit all OPTIONS requests
 						// Profile endpoints require authentication (both /api/auth/profile and
 						// /api/users/profile)
 						.requestMatchers("/api/auth/profile", "/api/users/profile").authenticated()
@@ -61,13 +70,13 @@ public class SecurityConfig {
 																														// vehicles
 						// Booking endpoints - User access
 						.requestMatchers(HttpMethod.POST, "/api/bookings").authenticated() // POST create booking
-						.requestMatchers(HttpMethod.GET, "/api/bookings/{id}").authenticated() // GET booking by ID
 						.requestMatchers(HttpMethod.GET, "/api/bookings/user").authenticated() // GET user bookings
-						.requestMatchers(HttpMethod.PUT, "/api/bookings/{id}/cancel").authenticated() // PUT cancel
-																										// booking
 						.requestMatchers(HttpMethod.GET, "/api/bookings/vendor").hasAuthority(UserRole.VENDOR.name()) // GET
 																														// vendor
 																														// bookings
+						.requestMatchers(HttpMethod.GET, "/api/bookings/{id}").authenticated() // GET booking by ID
+						.requestMatchers(HttpMethod.PUT, "/api/bookings/{id}/cancel").authenticated() // PUT cancel
+																										// booking
 						// Payment endpoints - User access
 						.requestMatchers(HttpMethod.POST, "/api/payments").authenticated() // POST create payment
 						.requestMatchers(HttpMethod.GET, "/api/payments/{bookingId}").authenticated() // GET payment by
@@ -124,6 +133,21 @@ public class SecurityConfig {
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
 		return config.getAuthenticationManager();
+	}
+
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Collections.singletonList("*")); // Or your frontend URL
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+		configuration.setAllowedHeaders(
+				Arrays.asList("Authorization", "Content-Type", "Accept", "x-requested-with", "Cache-Control"));
+		configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+		configuration.setMaxAge(3600L);
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
 	}
 
 }

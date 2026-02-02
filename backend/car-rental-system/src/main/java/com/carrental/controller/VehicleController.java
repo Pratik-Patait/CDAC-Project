@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -31,14 +32,21 @@ import lombok.RequiredArgsConstructor;
 public class VehicleController {
 
 	private final VehicleService vehicleService;
+	private final com.carrental.service.FileStorageService fileStorageService;
 
-	@PostMapping
-	public ResponseEntity<?> addVehicle(@Valid @RequestBody VehicleRequest request) {
+	@PostMapping(consumes = { "multipart/form-data" })
+	public ResponseEntity<?> addVehicle(@Valid @ModelAttribute VehicleRequest request) {
 		try {
 			// Extract authenticated user from SecurityContext
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
 				return ResponseEntity.status(401).body("Unauthorized");
+			}
+
+			// Handle Image Upload
+			if (request.getImage() != null && !request.getImage().isEmpty()) {
+				String imageUrl = fileStorageService.saveFile(request.getImage());
+				request.setImageUrl(imageUrl);
 			}
 
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -54,14 +62,20 @@ public class VehicleController {
 		}
 	}
 
-	@PutMapping("/{id}")
+	@PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
 	public ResponseEntity<?> updateVehicle(@PathVariable Integer id,
-			@Valid @RequestBody VehicleRequest request) {
+			@Valid @ModelAttribute VehicleRequest request) {
 		try {
 			// Extract authenticated user from SecurityContext
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
 				return ResponseEntity.status(401).body("Unauthorized");
+			}
+
+			// Handle Image Upload if a new file is provided
+			if (request.getImage() != null && !request.getImage().isEmpty()) {
+				String imageUrl = fileStorageService.saveFile(request.getImage());
+				request.setImageUrl(imageUrl);
 			}
 
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();

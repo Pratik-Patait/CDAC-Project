@@ -19,10 +19,12 @@ import com.carrental.repository.BookingRepository;
 import com.carrental.repository.UserRepository;
 import com.carrental.repository.VehicleRepository;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BookingServiceImpl implements BookingService {
 
 	private final BookingRepository bookingRepository;
@@ -32,6 +34,7 @@ public class BookingServiceImpl implements BookingService {
 	@Override
 	@Transactional
 	public BookingResponse createBooking(String userEmail, BookingRequest request) {
+		log.info("Initiating booking creation for user: {} on vehicle: {}", userEmail, request.getVehicleId());
 		// Find user
 		User user = userRepository.findByEmail(userEmail)
 				.orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -42,6 +45,7 @@ public class BookingServiceImpl implements BookingService {
 
 		// Validate vehicle is available
 		if (vehicle.getStatus() != VehicleStatus.AVAILABLE) {
+			log.warn("Booking failed: Vehicle {} is not AVAILABLE (Status: {})", vehicle.getId(), vehicle.getStatus());
 			throw new IllegalArgumentException("Vehicle is not available for booking");
 		}
 
@@ -61,6 +65,8 @@ public class BookingServiceImpl implements BookingService {
 				activeStatuses);
 
 		if (!conflictingBookings.isEmpty()) {
+			log.warn("Booking conflict detected for Vehicle {} between {} and {}", request.getVehicleId(),
+					request.getPickupDate(), request.getReturnDate());
 			throw new IllegalArgumentException("Vehicle is already booked for the selected dates");
 		}
 
@@ -88,6 +94,7 @@ public class BookingServiceImpl implements BookingService {
 
 		// Save booking
 		Booking savedBooking = bookingRepository.save(booking);
+		log.info("Booking created successfully: ID={}, TotalAmount={}", savedBooking.getId(), totalAmount);
 
 		// Convert to response
 		return convertToResponse(savedBooking);
@@ -123,6 +130,7 @@ public class BookingServiceImpl implements BookingService {
 	@Override
 	@Transactional
 	public BookingResponse cancelBooking(String userEmail, Integer bookingId) {
+		log.info("Cancellation requested for Booking ID: {} by User: {}", bookingId, userEmail);
 		// Find user
 		User user = userRepository.findByEmail(userEmail)
 				.orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -151,10 +159,12 @@ public class BookingServiceImpl implements BookingService {
 			Vehicle vehicle = booking.getVehicle();
 			vehicle.setStatus(VehicleStatus.AVAILABLE);
 			vehicleRepository.save(vehicle);
+			log.info("Vehicle {} status reverted to AVAILABLE due to cancellation", vehicle.getId());
 		}
 
 		// Save booking
 		Booking updatedBooking = bookingRepository.save(booking);
+		log.info("Booking ID: {} cancelled successfully", bookingId);
 
 		return convertToResponse(updatedBooking);
 	}
