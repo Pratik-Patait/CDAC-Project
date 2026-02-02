@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context';
 import { getUserBookings, cancelBooking, getBookingById } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import { FaClock, FaCheckCircle, FaTimesCircle, FaPlayCircle, FaCalendarCheck } from 'react-icons/fa';
 
 export default function BookingsPage() {
   const { user } = useAuth();
@@ -148,18 +149,18 @@ export default function BookingsPage() {
   };
 
   // Filter bookings based on status
-  const currentBookings = bookings.filter(b => 
+  const currentBookings = bookings.filter(b =>
     b.status === 'CONFIRMED' || b.status === 'PENDING' || b.status === 'ACTIVE'
   );
 
-  const pastBookings = bookings.filter(b => 
+  const pastBookings = bookings.filter(b =>
     b.status === 'COMPLETED' || b.status === 'CANCELLED'
   );
 
   const displayBookings = activeTab === 'current' ? currentBookings : pastBookings;
 
   const getStatusBadge = (status) => {
-    switch(status) {
+    switch (status) {
       case 'CONFIRMED':
         return <span className="badge bg-success">Confirmed</span>;
       case 'PENDING':
@@ -201,7 +202,7 @@ export default function BookingsPage() {
       {/* Tabs */}
       <ul className="nav nav-tabs mb-4" role="tablist">
         <li className="nav-item" role="presentation">
-          <button 
+          <button
             className={`nav-link ${activeTab === 'current' ? 'active' : ''}`}
             onClick={() => setActiveTab('current')}
             type="button"
@@ -212,7 +213,7 @@ export default function BookingsPage() {
           </button>
         </li>
         <li className="nav-item" role="presentation">
-          <button 
+          <button
             className={`nav-link ${activeTab === 'past' ? 'active' : ''}`}
             onClick={() => setActiveTab('past')}
             type="button"
@@ -319,27 +320,27 @@ export default function BookingsPage() {
                             </div>
 
                             {/* Action Buttons */}
-                              {(booking.status === 'CONFIRMED' || booking.status === 'PENDING' || booking.status === 'ACTIVE') && (
-                                <div className="d-flex gap-2 mt-3">
-                                  <button 
-                                    className="btn btn-sm btn-outline-primary flex-grow-1"
-                                    onClick={() => handleViewDetails(booking.id)}
+                            {(booking.status === 'CONFIRMED' || booking.status === 'PENDING' || booking.status === 'ACTIVE') && (
+                              <div className="d-flex gap-2 mt-3">
+                                <button
+                                  className="btn btn-sm btn-outline-primary flex-grow-1"
+                                  onClick={() => handleViewDetails(booking.id)}
+                                >
+                                  View Details
+                                </button>
+                                {booking.status !== 'CANCELLED' && (
+                                  <button
+                                    className="btn btn-sm btn-outline-danger flex-grow-1"
+                                    onClick={() => handleCancelBooking(booking.id)}
                                   >
-                                    View Details
+                                    Cancel
                                   </button>
-                                  {booking.status !== 'CANCELLED' && (
-                                    <button 
-                                      className="btn btn-sm btn-outline-danger flex-grow-1"
-                                      onClick={() => handleCancelBooking(booking.id)}
-                                    >
-                                      Cancel
-                                    </button>
-                                  )}
-                                </div>
-                              )}
+                                )}
+                              </div>
+                            )}
                             {booking.status === 'PENDING' && (
-                              <div className="alert alert-warning my-3 py-1 px-2 small mb-0">
-                                ⏳ Awaiting confirmation. Please complete the payment.
+                              <div className="alert alert-warning my-3 py-1 px-2 small mb-0 d-flex align-items-center">
+                                <FaClock className="me-2" /> Awaiting confirmation. Please complete the payment.
                               </div>
                             )}
                             {booking.status === 'COMPLETED' && (
@@ -366,24 +367,24 @@ export default function BookingsPage() {
 
       {/* Booking Details Modal */}
       {selectedBooking && (
-        <div 
-          className="modal fade show" 
+        <div
+          className="modal fade show"
           style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
           onClick={() => {
             setSelectedBooking(null);
             setBookingDetails(null);
           }}
         >
-          <div 
+          <div
             className="modal-dialog modal-lg modal-dialog-centered"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Booking Details #{selectedBooking}</h5>
-                <button 
-                  type="button" 
-                  className="btn-close" 
+                <button
+                  type="button"
+                  className="btn-close"
                   onClick={() => {
                     setSelectedBooking(null);
                     setBookingDetails(null);
@@ -440,9 +441,9 @@ export default function BookingsPage() {
                 )}
               </div>
               <div className="modal-footer">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   onClick={() => {
                     setSelectedBooking(null);
                     setBookingDetails(null);

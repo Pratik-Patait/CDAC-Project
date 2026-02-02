@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPendingUsers, approveUser, rejectUser, deleteUser } from '../../services/api';
+import { FaFileContract, FaArrowLeft, FaCheck, FaTimes } from 'react-icons/fa';
 
 export default function UserRegistrationRequestsPage() {
   const navigate = useNavigate();
@@ -72,15 +73,15 @@ export default function UserRegistrationRequestsPage() {
     } catch (err) {
       console.error('Error deleting user:', err);
       console.error('Error response:', err.response);
-      
+
       // Extract error message from response
       let errorMessage = 'Unknown error occurred';
-      
+
       if (err.response) {
         // Backend returns error message as string in response.data
         if (typeof err.response.data === 'string') {
           errorMessage = err.response.data;
-        } 
+        }
         // Handle JSON object response
         else if (err.response.data && typeof err.response.data === 'object') {
           errorMessage = err.response.data.message || err.response.data.error || JSON.stringify(err.response.data);
@@ -92,7 +93,7 @@ export default function UserRegistrationRequestsPage() {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       alert('Failed to delete user:\n' + errorMessage);
     }
   };
@@ -100,12 +101,12 @@ export default function UserRegistrationRequestsPage() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="fw-bold mb-0">📝 User Registration Requests</h1>
-        <button 
+        <h1 className="fw-bold mb-0"><FaFileContract className="me-2 text-warning" /> User Registration Requests</h1>
+        <button
           className="btn btn-outline-secondary"
           onClick={() => navigate('/admin/dashboard')}
         >
-          ← Back to Dashboard
+          <FaArrowLeft className="me-2" /> Back to Dashboard
         </button>
       </div>
 
@@ -155,10 +156,9 @@ export default function UserRegistrationRequestsPage() {
                           <tr>
                             <th>Role:</th>
                             <td>
-                              <span className={`badge ${
-                                user.role?.toUpperCase() === 'ADMIN' ? 'bg-danger' :
-                                user.role?.toUpperCase() === 'VENDOR' ? 'bg-info' : 'bg-primary'
-                              }`}>
+                              <span className={`badge ${user.role?.toUpperCase() === 'ADMIN' ? 'bg-danger' :
+                                  user.role?.toUpperCase() === 'VENDOR' ? 'bg-info' : 'bg-primary'
+                                }`}>
                                 {user.role || 'CUSTOMER'}
                               </span>
                             </td>
@@ -200,13 +200,13 @@ export default function UserRegistrationRequestsPage() {
                           className="btn btn-success flex-grow-1"
                           onClick={() => handleApprove(user.id)}
                         >
-                          ✓ Approve
+                          <FaCheck className="me-1" /> Approve
                         </button>
                         <button
                           className="btn btn-warning flex-grow-1"
                           onClick={() => handleReject(user.id)}
                         >
-                          ✕ Reject
+                          <FaTimes className="me-1" /> Reject
                         </button>
                         <button
                           className="btn btn-danger"

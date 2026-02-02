@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
-import { getVendorVehicles, addVehicle, updateVehicle, deleteVehicle, updateVehicleStatus } from '../../services/api'
+import { useState, useEffect } from 'react';
+import { getVendorVehicles, getVendorBookings, addVehicle, updateVehicle, deleteVehicle, updateVehicleStatus } from '../../services/api';
+import { FaPlus, FaCar, FaCheckCircle, FaCalendarAlt, FaMoneyBillWave, FaGasPump, FaCogs, FaUsers, FaEye, FaEdit, FaInfoCircle, FaTrash } from 'react-icons/fa';
 
 export default function VendorCars() {
   const [vehicles, setVehicles] = useState([])
+  const [bookingCount, setBookingCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedVehicle, setSelectedVehicle] = useState(null)
@@ -23,8 +25,8 @@ export default function VendorCars() {
     transmission: 'MANUAL',
     seatingCapacity: 5,
     description: '',
-    imageUrl: ''
   })
+  const [selectedFile, setSelectedFile] = useState(null)
 
   // Helper function to get image path
   const getImagePath = (imageUrl) => {
@@ -37,8 +39,8 @@ export default function VendorCars() {
     if (imageUrl.includes('/')) {
       return imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`
     }
-    // Just filename, add the folder path
-    return `/vehicle-images/${imageUrl}`
+    // Just filename, check if it looks like S3 url or local
+    return `/vehicle-images/${imageUrl}`;
   }
 
   // Fetch vehicles from backend
@@ -50,8 +52,12 @@ export default function VendorCars() {
     try {
       setLoading(true)
       setError(null)
-      const response = await getVendorVehicles()
-      setVehicles(response.data || [])
+      const [vehiclesRes, bookingsRes] = await Promise.all([
+        getVendorVehicles(),
+        getVendorBookings()
+      ])
+      setVehicles(vehiclesRes.data || [])
+      setBookingCount(bookingsRes.data?.length || 0)
     } catch (err) {
       if (err.response?.status === 403) {
         setError('Access denied. Please make sure you are logged in as a vendor and try logging out and back in.')
@@ -70,7 +76,7 @@ export default function VendorCars() {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'year' || name === 'seatingCapacity' || name === 'pricePerDay' 
+      [name]: name === 'year' || name === 'seatingCapacity' || name === 'pricePerDay'
         ? (value === '' ? '' : Number(value))
         : value
     }))
@@ -79,10 +85,8 @@ export default function VendorCars() {
   const handleImageSelect = (e) => {
     const file = e.target.files[0]
     if (file) {
-      // Extract just the filename
-      const fileName = file.name
-      setFormData(prev => ({ ...prev, imageUrl: fileName }))
-      
+      setSelectedFile(file);
+
       // Create preview
       const reader = new FileReader()
       reader.onloadend = () => {
@@ -95,7 +99,15 @@ export default function VendorCars() {
   const handleAddVehicle = async (e) => {
     e.preventDefault()
     try {
-      await addVehicle(formData)
+      const data = new FormData();
+      Object.keys(formData).forEach(key => {
+        if (key !== 'imageUrl') data.append(key, formData[key])
+      });
+      if (selectedFile) {
+        data.append('image', selectedFile);
+      }
+
+      await addVehicle(data)
       setShowAddModal(false)
       resetForm()
       fetchVehicles()
@@ -109,7 +121,15 @@ export default function VendorCars() {
   const handleEditVehicle = async (e) => {
     e.preventDefault()
     try {
-      await updateVehicle(selectedVehicle.id, formData)
+      const data = new FormData();
+      Object.keys(formData).forEach(key => {
+        if (key !== 'imageUrl') data.append(key, formData[key])
+      });
+      if (selectedFile) {
+        data.append('image', selectedFile);
+      }
+
+      await updateVehicle(selectedVehicle.id, data)
       setShowEditModal(false)
       resetForm()
       setSelectedVehicle(null)
@@ -160,9 +180,9 @@ export default function VendorCars() {
       fuelType: 'PETROL',
       transmission: 'MANUAL',
       seatingCapacity: 5,
-      description: '',
-      imageUrl: ''
+      description: ''
     })
+    setSelectedFile(null)
     setImagePreview(null)
   }
 
@@ -196,12 +216,12 @@ export default function VendorCars() {
     setShowStatusModal(true)
   }
 
-  const filteredVehicles = filterStatus === 'All' 
-    ? vehicles 
+  const filteredVehicles = filterStatus === 'All'
+    ? vehicles
     : vehicles.filter(vehicle => vehicle.status === filterStatus)
 
   const getStatusBadge = (status) => {
-    switch(status) {
+    switch (status) {
       case 'AVAILABLE':
         return <span className="badge bg-success">Available</span>
       case 'BOOKED':
@@ -255,14 +275,14 @@ export default function VendorCars() {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4>My Vehicles</h4>
-        <button 
+        <button
           className="btn btn-primary"
           onClick={() => {
             resetForm()
             setShowAddModal(true)
           }}
         >
-          ➕ Add New Car
+          <FaPlus className="me-2" /> Add New Car
         </button>
       </div>
 
@@ -270,7 +290,7 @@ export default function VendorCars() {
       <div className="row g-3 mb-4">
         <div className="col-md-3">
           <div className="vendor-stat-card">
-            <div className="stat-icon primary">🚗</div>
+            <div className="stat-icon primary"><FaCar /></div>
             <div className="stat-content">
               <h6 className="stat-label">Total Cars</h6>
               <h3 className="stat-value">{vehicles.length}</h3>
@@ -279,7 +299,7 @@ export default function VendorCars() {
         </div>
         <div className="col-md-3">
           <div className="vendor-stat-card">
-            <div className="stat-icon success">✓</div>
+            <div className="stat-icon success"><FaCheckCircle /></div>
             <div className="stat-content">
               <h6 className="stat-label">Available</h6>
               <h3 className="stat-value">{availableCount}</h3>
@@ -288,16 +308,16 @@ export default function VendorCars() {
         </div>
         <div className="col-md-3">
           <div className="vendor-stat-card">
-            <div className="stat-icon info">📅</div>
+            <div className="stat-icon info"><FaCalendarAlt /></div>
             <div className="stat-content">
               <h6 className="stat-label">Total Bookings</h6>
-              <h3 className="stat-value">-</h3>
+              <h3 className="stat-value">{bookingCount}</h3>
             </div>
           </div>
         </div>
         <div className="col-md-3">
           <div className="vendor-stat-card">
-            <div className="stat-icon accent">💰</div>
+            <div className="stat-icon accent"><FaMoneyBillWave /></div>
             <div className="stat-content">
               <h6 className="stat-label">Est. Revenue</h6>
               <h3 className="stat-value">₹{(totalEarnings / 100000).toFixed(1)}L</h3>
@@ -317,8 +337,8 @@ export default function VendorCars() {
             >
               {status === 'All' ? 'All' : getStatusDisplayName(status)}
               <span className="filter-count">
-                {status === 'All' 
-                  ? vehicles.length 
+                {status === 'All'
+                  ? vehicles.length
                   : vehicles.filter(v => v.status === status).length
                 }
               </span>
@@ -341,9 +361,9 @@ export default function VendorCars() {
               <div className="vendor-car-card">
                 <div className="car-image">
                   {vehicle.imageUrl ? (
-                    <img 
-                      src={getImagePath(vehicle.imageUrl)} 
-                      alt={vehicle.make} 
+                    <img
+                      src={getImagePath(vehicle.imageUrl)}
+                      alt={vehicle.make}
                       style={{ width: '100%', height: '150px', objectFit: 'cover' }}
                       onError={(e) => {
                         e.target.style.display = 'none'
@@ -351,7 +371,7 @@ export default function VendorCars() {
                       }}
                     />
                   ) : null}
-                  {!vehicle.imageUrl && <span className="car-emoji">🚗</span>}
+                  {!vehicle.imageUrl && <div className="d-flex justify-content-center align-items-center h-100 bg-light"><FaCar size={40} className="text-secondary" /></div>}
                   {getStatusBadge(vehicle.status)}
                 </div>
 
@@ -361,15 +381,15 @@ export default function VendorCars() {
 
                   <div className="car-specs">
                     <div className="spec">
-                      <span className="spec-icon">⛽</span>
+                      <span className="spec-icon"><FaGasPump /></span>
                       <span className="spec-text">{vehicle.fuelType}</span>
                     </div>
                     <div className="spec">
-                      <span className="spec-icon">⚙️</span>
+                      <span className="spec-icon"><FaCogs /></span>
                       <span className="spec-text">{vehicle.transmission}</span>
                     </div>
                     <div className="spec">
-                      <span className="spec-icon">👥</span>
+                      <span className="spec-icon"><FaUsers /></span>
                       <span className="spec-text">{vehicle.seatingCapacity} Seats</span>
                     </div>
                   </div>
@@ -381,13 +401,13 @@ export default function VendorCars() {
                 </div>
 
                 <div className="car-card-footer">
-                  <button 
+                  <button
                     className="btn btn-sm btn-primary"
                     onClick={() => setSelectedVehicle(vehicle)}
                   >
                     View Details
                   </button>
-                  <button 
+                  <button
                     className="btn btn-sm btn-outline-primary"
                     onClick={() => openEditModal(vehicle)}
                   >
@@ -423,7 +443,7 @@ export default function VendorCars() {
                 <tr key={vehicle.id}>
                   <td>
                     <strong>{vehicle.make} {vehicle.model}</strong>
-                    <br/>
+                    <br />
                     <small className="text-muted">{vehicle.year} - {vehicle.color}</small>
                   </td>
                   <td>{vehicle.licensePlate}</td>
@@ -433,29 +453,33 @@ export default function VendorCars() {
                   <td>{getStatusBadge(vehicle.status)}</td>
                   <td>
                     <div className="btn-group btn-group-sm">
-                      <button 
+                      <button
                         className="btn btn-outline-primary"
                         onClick={() => setSelectedVehicle(vehicle)}
+                        title="View Details"
                       >
-                        View
+                        <FaEye />
                       </button>
-                      <button 
+                      <button
                         className="btn btn-outline-secondary"
                         onClick={() => openEditModal(vehicle)}
+                        title="Edit"
                       >
-                        Edit
+                        <FaEdit />
                       </button>
-                      <button 
+                      <button
                         className="btn btn-outline-warning"
                         onClick={() => openStatusModal(vehicle)}
+                        title="Change Status"
                       >
-                        Status
+                        <FaInfoCircle />
                       </button>
-                      <button 
+                      <button
                         className="btn btn-outline-danger"
                         onClick={() => handleDeleteVehicle(vehicle.id)}
+                        title="Delete"
                       >
-                        Delete
+                        <FaTrash />
                       </button>
                     </div>
                   </td>
@@ -472,7 +496,7 @@ export default function VendorCars() {
           <div className="vendor-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h5>{selectedVehicle.make} {selectedVehicle.model} - Details</h5>
-              <button 
+              <button
                 className="btn-close"
                 onClick={() => setSelectedVehicle(null)}
               ></button>
@@ -542,19 +566,19 @@ export default function VendorCars() {
               )}
             </div>
             <div className="modal-footer">
-              <button 
+              <button
                 className="btn btn-secondary"
                 onClick={() => setSelectedVehicle(null)}
               >
                 Close
               </button>
-              <button 
+              <button
                 className="btn btn-primary"
                 onClick={() => openEditModal(selectedVehicle)}
               >
                 Edit Vehicle
               </button>
-              <button 
+              <button
                 className="btn btn-warning"
                 onClick={() => openStatusModal(selectedVehicle)}
               >
@@ -571,7 +595,7 @@ export default function VendorCars() {
           <div className="vendor-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h5>Add New Vehicle</h5>
-              <button 
+              <button
                 className="btn-close"
                 onClick={() => setShowAddModal(false)}
               ></button>
@@ -721,9 +745,9 @@ export default function VendorCars() {
                     />
                     {imagePreview && (
                       <div className="mt-2">
-                        <img 
-                          src={imagePreview} 
-                          alt="Preview" 
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
                           style={{ maxWidth: '200px', maxHeight: '150px', objectFit: 'cover', border: '1px solid #ddd', borderRadius: '4px' }}
                         />
                       </div>
@@ -732,7 +756,7 @@ export default function VendorCars() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button 
+                <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => {
@@ -761,7 +785,7 @@ export default function VendorCars() {
           <div className="vendor-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h5>Edit Vehicle</h5>
-              <button 
+              <button
                 className="btn-close"
                 onClick={() => {
                   setShowEditModal(false)
@@ -915,9 +939,9 @@ export default function VendorCars() {
                     />
                     {imagePreview && (
                       <div className="mt-2">
-                        <img 
-                          src={imagePreview} 
-                          alt="Preview" 
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
                           style={{ maxWidth: '200px', maxHeight: '150px', objectFit: 'cover', border: '1px solid #ddd', borderRadius: '4px' }}
                         />
                       </div>
@@ -926,7 +950,7 @@ export default function VendorCars() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button 
+                <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => {
@@ -955,7 +979,7 @@ export default function VendorCars() {
           <div className="vendor-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h5>Update Vehicle Status</h5>
-              <button 
+              <button
                 className="btn-close"
                 onClick={() => {
                   setShowStatusModal(false)
@@ -981,7 +1005,7 @@ export default function VendorCars() {
               </div>
             </div>
             <div className="modal-footer">
-              <button 
+              <button
                 className="btn btn-secondary"
                 onClick={() => {
                   setShowStatusModal(false)

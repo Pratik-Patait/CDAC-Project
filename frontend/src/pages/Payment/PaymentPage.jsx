@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context';
 import { createBooking, createPayment } from '../../services/api';
+import { FaCar, FaMobileAlt } from 'react-icons/fa';
 
 export default function PaymentPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const car = location.state?.car || location.state?.vehicle || null;
 
   // Helper function to get image path
@@ -16,14 +17,14 @@ export default function PaymentPage() {
     if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
       return imageUrl;
     }
-    
+
     // If imageUrl is provided (just filename), use it
     if (imageUrl) {
       // Remove any leading slashes
       const cleanUrl = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
       return `/vehicle-images/${cleanUrl}`;
     }
-    
+
     // Fallback: Try to match based on make/model
     const makeModel = `${make || ''}${model || ''}`.toLowerCase().replace(/\s+/g, '');
     const imageMap = {
@@ -36,14 +37,14 @@ export default function PaymentPage() {
       'tatanexon': '/vehicle-images/Nexon.jpg',
       'marutimaruti': '/vehicle-images/Maruti.jpg'
     };
-    
+
     // Try to find matching image
     for (const [key, path] of Object.entries(imageMap)) {
       if (makeModel.includes(key)) {
         return path;
       }
     }
-    
+
     // Final fallback
     return '/vehicle-images/Accord.jpg';
   };
@@ -129,7 +130,7 @@ export default function PaymentPage() {
 
       const bookingResponse = await createBooking(bookingData);
       const bookingId = bookingResponse.data.id;
-      
+
       // Step 2: Create payment
       const paymentData = {
         bookingId: bookingId,
@@ -138,7 +139,7 @@ export default function PaymentPage() {
       };
 
       await createPayment(paymentData);
-      
+
       // Success
       alert('Payment successful! Your booking has been confirmed.');
       navigate('/bookings');
@@ -160,7 +161,7 @@ export default function PaymentPage() {
           {/* Car Summary with Image */}
           <div className="card mb-4 shadow-lg">
             <div className="card-header bg-dark text-white">
-              <h5 className="mb-0">🚗 Booking Summary</h5>
+              <h5 className="mb-0"><FaCar className="me-2" /> Booking Summary</h5>
             </div>
             <div className="card-body">
               {/* Large Car Image */}
@@ -261,7 +262,7 @@ export default function PaymentPage() {
           {/* UPI Payment */}
           <div className="card mb-4">
             <div className="card-header bg-success text-white">
-              <h5 className="mb-0">📱 UPI Payment</h5>
+              <h5 className="mb-0"><FaMobileAlt className="me-2" /> UPI Payment</h5>
             </div>
             <div className="card-body">
               <div className="mb-3">
@@ -340,7 +341,7 @@ export default function PaymentPage() {
                 onClick={handlePayment}
                 disabled={loading || days <= 0}
               >
-                {loading ? '⏳ Processing...' : `📱 Pay via UPI ₹${Math.round(totalCost * 1.1).toLocaleString()}`}
+                {loading ? <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...</> : <><FaMobileAlt className="me-2" /> Pay via UPI ₹{Math.round(totalCost * 1.1).toLocaleString()}</>}
               </button>
 
               {/* Info */}

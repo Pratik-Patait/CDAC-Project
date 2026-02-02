@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllVehicles, deleteVehicle } from '../../services/api';
+import { FaCar, FaEye, FaTrash } from 'react-icons/fa';
 
 export default function AdminCarsPage() {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ export default function AdminCarsPage() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="fw-bold mb-0">🚗 Manage Vehicles</h1>
+        <h1 className="fw-bold mb-0"><FaCar className="me-2 text-primary" /> Manage Vehicles</h1>
       </div>
 
       {/* Search and Filter */}
@@ -147,9 +148,9 @@ export default function AdminCarsPage() {
                         }}
                       />
                       <span className={`position-absolute top-0 end-0 badge m-2 ${vehicle.status === 'AVAILABLE' ? 'bg-success' :
-                          vehicle.status === 'BOOKED' ? 'bg-info' :
-                            vehicle.status === 'UNDER_MAINTENANCE' ? 'bg-warning text-dark' :
-                              'bg-secondary'
+                        vehicle.status === 'BOOKED' ? 'bg-info' :
+                          vehicle.status === 'UNDER_MAINTENANCE' ? 'bg-warning text-dark' :
+                            'bg-secondary'
                         }`}>
                         {vehicle.status === 'AVAILABLE' ? 'Available' :
                           vehicle.status === 'BOOKED' ? 'Booked' :
@@ -175,13 +176,13 @@ export default function AdminCarsPage() {
                           className="btn btn-sm btn-outline-secondary flex-grow-1"
                           onClick={() => handleViewVehicle(vehicle)}
                         >
-                          ✏️ View
+                          <FaEye className="me-1" /> View
                         </button>
                         <button
                           className="btn btn-sm btn-outline-danger flex-grow-1"
                           onClick={() => handleDeleteVehicle(vehicle)}
                         >
-                          🗑️ Delete
+                          <FaTrash className="me-1" /> Delete
                         </button>
                       </div>
                     </div>
@@ -255,9 +256,9 @@ export default function AdminCarsPage() {
                           <th>Status:</th>
                           <td>
                             <span className={`badge ${selectedVehicle.status === 'AVAILABLE' ? 'bg-success' :
-                                selectedVehicle.status === 'BOOKED' ? 'bg-info' :
-                                  selectedVehicle.status === 'UNDER_MAINTENANCE' ? 'bg-warning text-dark' :
-                                    'bg-secondary'
+                              selectedVehicle.status === 'BOOKED' ? 'bg-info' :
+                                selectedVehicle.status === 'UNDER_MAINTENANCE' ? 'bg-warning text-dark' :
+                                  'bg-secondary'
                               }`}>
                               {selectedVehicle.status === 'AVAILABLE' ? 'Available' :
                                 selectedVehicle.status === 'BOOKED' ? 'Booked' :

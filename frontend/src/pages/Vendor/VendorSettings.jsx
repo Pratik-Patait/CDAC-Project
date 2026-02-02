@@ -2,19 +2,22 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context'
 import { updateProfile as apiUpdateProfile, deleteProfile as apiDeleteProfile } from '../../services/api'
+import { FaCheckCircle } from 'react-icons/fa'
 
 export default function VendorSettings() {
   const { user, updateUser, logout } = useAuth()
   const navigate = useNavigate()
-  
+
   const [vendorInfo, setVendorInfo] = useState({
     fullName: '',
     email: '',
     phone: '',
-    businessName: 'RentYourCar Express',
-    businessAddress: '123 Car Street, Mumbai, MH 400001',
-    businessPhone: '+91 98765 43200',
-    taxId: 'TIN123456789'
+    licenseNo: '',
+    houseNo: '',
+    buildingName: '',
+    streetName: '',
+    area: '',
+    pincode: ''
   })
 
   // Update vendorInfo when user data is available
@@ -24,21 +27,18 @@ export default function VendorSettings() {
         ...prev,
         fullName: user.name || user.fullName || '',
         email: user.email || '',
-        phone: user.phoneNo || user.phone || ''
+        phone: user.phoneNo || user.phone || '',
+        licenseNo: user.licenseNo || '',
+        houseNo: user.houseNo || '',
+        buildingName: user.buildingName || '',
+        streetName: user.streetName || '',
+        area: user.area || '',
+        pincode: user.pincode || ''
       }))
     }
   }, [user])
 
-  const [preferences, setPreferences] = useState({
-    emailNotifications: true,
-    smsNotifications: true,
-    pushNotifications: true,
-    weeklyReports: true,
-    monthlyReports: false,
-    autoApproveBookings: false,
-    maintenanceReminders: true,
-    documentExpiry: true
-  })
+
 
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
@@ -59,12 +59,7 @@ export default function VendorSettings() {
     }))
   }
 
-  const handlePreferenceChange = (key) => {
-    setPreferences(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }))
-  }
+
 
   const handleSave = async () => {
     try {
@@ -73,17 +68,22 @@ export default function VendorSettings() {
       const updateData = {
         name: vendorInfo.fullName,
         phoneNo: vendorInfo.phone,
-        // Add other fields that can be updated
+        licenseNo: vendorInfo.licenseNo,
+        houseNo: vendorInfo.houseNo,
+        buildingName: vendorInfo.buildingName,
+        streetName: vendorInfo.streetName,
+        area: vendorInfo.area,
+        pincode: vendorInfo.pincode
       }
-      
+
       const response = await apiUpdateProfile(updateData)
-      
+
       // Update local user context
       if (user) {
         const updatedUser = { ...user, ...updateData }
         updateUser(updatedUser)
       }
-      
+
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (error) {
@@ -96,18 +96,18 @@ export default function VendorSettings() {
 
   const handleChangePassword = async () => {
     setPasswordError('')
-    
+
     // Validation
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
       setPasswordError('All fields are required')
       return
     }
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setPasswordError('New password and confirm password do not match')
       return
     }
-    
+
     if (passwordData.newPassword.length < 6) {
       setPasswordError('Password must be at least 6 characters long')
       return
@@ -119,7 +119,7 @@ export default function VendorSettings() {
         currentPassword: passwordData.currentPassword,
         password: passwordData.newPassword
       }
-      
+
       await apiUpdateProfile(updateData)
       alert('Password changed successfully!')
       setShowChangePasswordModal(false)
@@ -158,7 +158,7 @@ export default function VendorSettings() {
 
       {saveSuccess && (
         <div className="alert alert-success alert-dismissible fade show" role="alert">
-          ✓ Settings saved successfully!
+          <FaCheckCircle className="me-2" /> Settings saved successfully!
           <button type="button" className="btn-close" data-bs-dismiss="alert"></button>
         </div>
       )}
@@ -166,14 +166,14 @@ export default function VendorSettings() {
       {/* Personal Information */}
       <div className="vendor-card mb-4">
         <div className="card-header">
-          <h5 className="mb-0">Personal Information</h5>
+          <h5 className="mb-0">Profile Information</h5>
         </div>
         <div className="card-body">
           <div className="row g-3">
             <div className="col-md-6">
               <label className="form-label">Full Name</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 className="form-control"
                 name="fullName"
                 value={vendorInfo.fullName}
@@ -182,72 +182,94 @@ export default function VendorSettings() {
             </div>
             <div className="col-md-6">
               <label className="form-label">Email Address</label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 className="form-control"
                 name="email"
                 value={vendorInfo.email}
                 onChange={handleVendorInfoChange}
+                disabled // Email cannot be changed
               />
+              <small className="text-muted">Email cannot be changed</small>
             </div>
             <div className="col-md-6">
               <label className="form-label">Phone Number</label>
-              <input 
-                type="tel" 
+              <input
+                type="tel"
                 className="form-control"
                 name="phone"
                 value={vendorInfo.phone}
                 onChange={handleVendorInfoChange}
               />
             </div>
+            <div className="col-md-6">
+              <label className="form-label">License Number</label>
+              <input
+                type="text"
+                className="form-control"
+                name="licenseNo"
+                value={vendorInfo.licenseNo || ''}
+                onChange={handleVendorInfoChange}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Business Information */}
+      {/* Address Information */}
       <div className="vendor-card mb-4">
         <div className="card-header">
-          <h5 className="mb-0">Business Information</h5>
+          <h5 className="mb-0">Address Details</h5>
         </div>
         <div className="card-body">
           <div className="row g-3">
             <div className="col-md-6">
-              <label className="form-label">Business Name</label>
-              <input 
-                type="text" 
+              <label className="form-label">House/Flat No</label>
+              <input
+                type="text"
                 className="form-control"
-                name="businessName"
-                value={vendorInfo.businessName}
+                name="houseNo"
+                value={vendorInfo.houseNo}
                 onChange={handleVendorInfoChange}
               />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Business Phone</label>
-              <input 
-                type="tel" 
+              <label className="form-label">Building Name</label>
+              <input
+                type="text"
                 className="form-control"
-                name="businessPhone"
-                value={vendorInfo.businessPhone}
+                name="buildingName"
+                value={vendorInfo.buildingName}
                 onChange={handleVendorInfoChange}
               />
             </div>
-            <div className="col-12">
-              <label className="form-label">Business Address</label>
-              <textarea 
+            <div className="col-md-12">
+              <label className="form-label">Street Name</label>
+              <input
+                type="text"
                 className="form-control"
-                rows="2"
-                name="businessAddress"
-                value={vendorInfo.businessAddress}
+                name="streetName"
+                value={vendorInfo.streetName}
                 onChange={handleVendorInfoChange}
-              ></textarea>
+              />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Tax ID (TIN)</label>
-              <input 
-                type="text" 
+              <label className="form-label">Area/Locality</label>
+              <input
+                type="text"
                 className="form-control"
-                name="taxId"
-                value={vendorInfo.taxId}
+                name="area"
+                value={vendorInfo.area}
+                onChange={handleVendorInfoChange}
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Pincode</label>
+              <input
+                type="text"
+                className="form-control"
+                name="pincode"
+                value={vendorInfo.pincode}
                 onChange={handleVendorInfoChange}
               />
             </div>
@@ -255,148 +277,7 @@ export default function VendorSettings() {
         </div>
       </div>
 
-      {/* Notification Preferences */}
-      <div className="vendor-card mb-4">
-        <div className="card-header">
-          <h5 className="mb-0">Notification Preferences</h5>
-        </div>
-        <div className="card-body">
-          <div className="settings-group">
-            <h6 className="settings-group-title">Communication Channels</h6>
-            <div className="settings-item">
-              <div className="settings-label">
-                <label className="form-check-label">Email Notifications</label>
-                <small className="text-muted">Get booking and system updates via email</small>
-              </div>
-              <label className="toggle-switch">
-                <input 
-                  type="checkbox" 
-                  checked={preferences.emailNotifications}
-                  onChange={() => handlePreferenceChange('emailNotifications')}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-label">
-                <label className="form-check-label">SMS Notifications</label>
-                <small className="text-muted">Get instant alerts via SMS</small>
-              </div>
-              <label className="toggle-switch">
-                <input 
-                  type="checkbox" 
-                  checked={preferences.smsNotifications}
-                  onChange={() => handlePreferenceChange('smsNotifications')}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-label">
-                <label className="form-check-label">Push Notifications</label>
-                <small className="text-muted">Browser notifications on your device</small>
-              </div>
-              <label className="toggle-switch">
-                <input 
-                  type="checkbox" 
-                  checked={preferences.pushNotifications}
-                  onChange={() => handlePreferenceChange('pushNotifications')}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
-
-          <hr />
-
-          <div className="settings-group">
-            <h6 className="settings-group-title">Reports & Analytics</h6>
-            <div className="settings-item">
-              <div className="settings-label">
-                <label className="form-check-label">Weekly Reports</label>
-                <small className="text-muted">Receive weekly performance summaries</small>
-              </div>
-              <label className="toggle-switch">
-                <input 
-                  type="checkbox" 
-                  checked={preferences.weeklyReports}
-                  onChange={() => handlePreferenceChange('weeklyReports')}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-label">
-                <label className="form-check-label">Monthly Reports</label>
-                <small className="text-muted">Detailed monthly analytics and insights</small>
-              </div>
-              <label className="toggle-switch">
-                <input 
-                  type="checkbox" 
-                  checked={preferences.monthlyReports}
-                  onChange={() => handlePreferenceChange('monthlyReports')}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
-
-          <hr />
-
-          <div className="settings-group">
-            <h6 className="settings-group-title">Booking Management</h6>
-            <div className="settings-item">
-              <div className="settings-label">
-                <label className="form-check-label">Auto-Approve Bookings</label>
-                <small className="text-muted">Automatically approve all new bookings</small>
-              </div>
-              <label className="toggle-switch">
-                <input 
-                  type="checkbox" 
-                  checked={preferences.autoApproveBookings}
-                  onChange={() => handlePreferenceChange('autoApproveBookings')}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-label">
-                <label className="form-check-label">Maintenance Reminders</label>
-                <small className="text-muted">Alerts for scheduled maintenance</small>
-              </div>
-              <label className="toggle-switch">
-                <input 
-                  type="checkbox" 
-                  checked={preferences.maintenanceReminders}
-                  onChange={() => handlePreferenceChange('maintenanceReminders')}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-
-            <div className="settings-item">
-              <div className="settings-label">
-                <label className="form-check-label">Document Expiry Alerts</label>
-                <small className="text-muted">Reminders for insurance and license renewal</small>
-              </div>
-              <label className="toggle-switch">
-                <input 
-                  type="checkbox" 
-                  checked={preferences.documentExpiry}
-                  onChange={() => handlePreferenceChange('documentExpiry')}
-                />
-                <span className="toggle-slider"></span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Danger Zone */}
+      {/* Account Actions */}
       <div className="vendor-card danger-zone">
         <div className="card-header bg-danger-light">
           <h5 className="mb-0">Account Actions</h5>
@@ -405,8 +286,8 @@ export default function VendorSettings() {
           <div className="row g-3">
             <div className="col-md-6">
               <h6>Change Password</h6>
-              <p className="text-muted small">Update your account password</p>
-              <button 
+              <p className="text-muted small">Update your account password to keep your account secure.</p>
+              <button
                 className="btn btn-outline-primary"
                 onClick={() => setShowChangePasswordModal(true)}
                 disabled={isLoading}
@@ -416,8 +297,8 @@ export default function VendorSettings() {
             </div>
             <div className="col-md-6">
               <h6 className="text-danger">Delete Account</h6>
-              <p className="text-muted small">Permanently delete your vendor account</p>
-              <button 
+              <p className="text-muted small">Permanently delete your vendor account and all associated data.</p>
+              <button
                 className="btn btn-outline-danger"
                 onClick={() => setShowDeleteModal(true)}
                 disabled={isLoading}
@@ -449,7 +330,7 @@ export default function VendorSettings() {
           <div className="vendor-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h5>Change Password</h5>
-              <button 
+              <button
                 className="btn-close"
                 onClick={() => {
                   setShowChangePasswordModal(false)
@@ -495,7 +376,7 @@ export default function VendorSettings() {
               </div>
             </div>
             <div className="modal-footer">
-              <button 
+              <button
                 className="btn btn-secondary"
                 onClick={() => {
                   setShowChangePasswordModal(false)
@@ -506,7 +387,7 @@ export default function VendorSettings() {
               >
                 Cancel
               </button>
-              <button 
+              <button
                 className="btn btn-primary"
                 onClick={handleChangePassword}
                 disabled={isLoading}
@@ -524,7 +405,7 @@ export default function VendorSettings() {
           <div className="vendor-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header bg-danger text-white">
               <h5>Delete Account</h5>
-              <button 
+              <button
                 className="btn-close btn-close-white"
                 onClick={() => setShowDeleteModal(false)}
               ></button>
@@ -546,14 +427,14 @@ export default function VendorSettings() {
               <p className="text-danger fw-bold">This action is permanent and irreversible!</p>
             </div>
             <div className="modal-footer">
-              <button 
+              <button
                 className="btn btn-secondary"
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isLoading}
               >
                 Cancel
               </button>
-              <button 
+              <button
                 className="btn btn-danger"
                 onClick={handleDeleteAccount}
                 disabled={isLoading}

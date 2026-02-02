@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAdminStats, getAllBookings, getPendingUsers } from '../../services/api';
+import { FaChartBar, FaUsers, FaCar, FaCalendarCheck, FaMoneyBillWave, FaExclamationTriangle, FaFileContract, FaClipboardList, FaChartPie, FaArrowRight } from 'react-icons/fa';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export default function AdminDashboard() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch stats
       const statsResponse = await getAdminStats();
       if (statsResponse.data) {
@@ -103,7 +104,7 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="mb-4 fw-bold">📊 Admin Dashboard</h1>
+      <h1 className="mb-4 fw-bold"><FaChartBar className="me-2 text-primary" /> Admin Dashboard</h1>
 
       {/* Stats Cards */}
       <div className="row g-4 mb-4">
@@ -152,15 +153,15 @@ export default function AdminDashboard() {
       {pendingUsers.length > 0 && (
         <div className="card shadow-sm border-0 mb-4 border-warning">
           <div className="card-header bg-warning text-dark">
-            <h5 className="mb-0 fw-bold">⚠️ New User Registrations ({pendingUsers.length})</h5>
+            <h5 className="mb-0 fw-bold"><FaExclamationTriangle className="me-2" /> New User Registrations ({pendingUsers.length})</h5>
           </div>
           <div className="card-body">
             <p className="mb-3">You have {pendingUsers.length} pending user registration{pendingUsers.length !== 1 ? 's' : ''} awaiting approval.</p>
-            <button 
+            <button
               className="btn btn-warning"
               onClick={() => navigate('/admin/users/registration-requests')}
             >
-              View Registration Requests →
+              View Registration Requests <FaArrowRight className="ms-1" />
             </button>
           </div>
         </div>
@@ -176,36 +177,36 @@ export default function AdminDashboard() {
             <div className="card-body">
               <div className="d-grid gap-2">
                 {pendingUsers.length > 0 && (
-                  <button 
+                  <button
                     className="btn btn-outline-warning text-start fw-bold"
                     onClick={() => navigate('/admin/users/registration-requests')}
                   >
-                    📝 Review New User Registrations ({pendingUsers.length})
+                    <FaFileContract className="me-2" /> Review New User Registrations ({pendingUsers.length})
                   </button>
                 )}
-                <button 
+                <button
                   className="btn btn-outline-dark text-start"
                   onClick={() => navigate('/admin/cars')}
                 >
-                  🚗 Manage Vehicles
+                  <FaCar className="me-2" /> Manage Vehicles
                 </button>
-                <button 
+                <button
                   className="btn btn-outline-dark text-start"
                   onClick={() => navigate('/admin/bookings')}
                 >
-                  📋 View All Bookings
+                  <FaClipboardList className="me-2" /> View All Bookings
                 </button>
-                <button 
+                <button
                   className="btn btn-outline-dark text-start"
                   onClick={() => navigate('/admin/users')}
                 >
-                  👥 Manage Users
+                  <FaUsers className="me-2" /> Manage Users
                 </button>
-                <button 
+                <button
                   className="btn btn-outline-dark text-start"
                   onClick={() => navigate('/admin/reports')}
                 >
-                  📊 Generate Reports
+                  <FaChartPie className="me-2" /> Generate Reports
                 </button>
               </div>
             </div>
@@ -224,8 +225,8 @@ export default function AdminDashboard() {
                   <strong>{stats.completedBookings || 0}</strong>
                 </div>
                 <div className="progress">
-                  <div 
-                    className="progress-bar bg-success" 
+                  <div
+                    className="progress-bar bg-success"
                     style={{ width: stats.totalBookings > 0 ? `${(stats.completedBookings / stats.totalBookings) * 100}%` : '0%' }}
                   ></div>
                 </div>
@@ -237,8 +238,8 @@ export default function AdminDashboard() {
                   <strong>{stats.pendingBookings || 0}</strong>
                 </div>
                 <div className="progress">
-                  <div 
-                    className="progress-bar bg-warning" 
+                  <div
+                    className="progress-bar bg-warning"
                     style={{ width: stats.totalBookings > 0 ? `${(stats.pendingBookings / stats.totalBookings) * 100}%` : '0%' }}
                   ></div>
                 </div>
@@ -250,8 +251,8 @@ export default function AdminDashboard() {
                   <strong>{stats.totalVehicles > 0 ? Math.round((stats.bookedVehicles / stats.totalVehicles) * 100) : 0}%</strong>
                 </div>
                 <div className="progress">
-                  <div 
-                    className="progress-bar bg-info" 
+                  <div
+                    className="progress-bar bg-info"
                     style={{ width: stats.totalVehicles > 0 ? `${(stats.bookedVehicles / stats.totalVehicles) * 100}%` : '0%' }}
                   ></div>
                 </div>
@@ -264,7 +265,7 @@ export default function AdminDashboard() {
       {/* Recent Bookings */}
       <div className="card shadow-sm border-0">
         <div className="card-header bg-light text-dark border-bottom">
-          <h5 className="mb-0 fw-bold">📋 Recent Bookings</h5>
+          <h5 className="mb-0 fw-bold"><FaClipboardList className="me-2" /> Recent Bookings</h5>
         </div>
         <div className="card-body p-0">
           <div className="table-responsive">
@@ -297,7 +298,7 @@ export default function AdminDashboard() {
                       <td>{getStatusBadge(booking.status)}</td>
                       <td><strong>₹{booking.totalAmount?.toLocaleString() || '0'}</strong></td>
                       <td>
-                        <button 
+                        <button
                           className="btn btn-sm btn-outline-dark"
                           onClick={() => navigate('/admin/bookings')}
                         >

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllComplaints, resolveComplaint } from '../../services/api';
+import { FaClipboardList } from 'react-icons/fa';
 
 export default function AdminComplaintsPage() {
   const navigate = useNavigate();
@@ -86,7 +87,7 @@ export default function AdminComplaintsPage() {
 
   return (
     <div>
-      <h1 className="fw-bold mb-4">📝 Manage Complaints</h1>
+      <h1 className="fw-bold mb-4"><FaClipboardList className="me-2 text-primary" /> Manage Complaints</h1>
 
       {/* Status Tabs */}
       <ul className="nav nav-tabs mb-4">
@@ -210,9 +211,9 @@ export default function AdminComplaintsPage() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   onClick={() => {
                     setShowResolveModal(false);
                     setSelectedComplaint(null);
@@ -221,8 +222,8 @@ export default function AdminComplaintsPage() {
                 >
                   Cancel
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-success"
                   onClick={handleSubmitResolution}
                 >

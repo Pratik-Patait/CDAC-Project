@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { approveReview, rejectReview } from '../../services/api';
 import api from '../../services/api';
+import { FaStar, FaRegStar, FaCheck, FaTimes } from 'react-icons/fa';
 
 export default function AdminReviewsPage() {
   const navigate = useNavigate();
@@ -84,12 +85,16 @@ export default function AdminReviewsPage() {
   };
 
   const renderStars = (rating) => {
-    return '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
+    return [...Array(5)].map((_, i) => (
+      <span key={i}>
+        {i < rating ? <FaStar /> : <FaRegStar />}
+      </span>
+    ));
   };
 
   return (
     <div>
-      <h1 className="fw-bold mb-4">⭐ Manage Reviews</h1>
+      <h1 className="fw-bold mb-4"><FaStar className="me-2 text-warning" /> Manage Reviews</h1>
 
       {/* Status Tabs */}
       <ul className="nav nav-tabs mb-4">
@@ -99,9 +104,9 @@ export default function AdminReviewsPage() {
               className={`nav-link ${activeTab === tab ? 'active fw-bold' : ''}`}
               onClick={() => setActiveTab(tab)}
             >
-              {tab === 'PENDING' ? 'Pending' : 
-               tab === 'APPROVED' ? 'Approved' : 
-               tab === 'REJECTED' ? 'Rejected' : tab}
+              {tab === 'PENDING' ? 'Pending' :
+                tab === 'APPROVED' ? 'Approved' :
+                  tab === 'REJECTED' ? 'Rejected' : tab}
               {tab !== 'ALL' && (
                 <span className="badge bg-secondary ms-2">
                   {reviews.filter(r => r.status === tab).length}
@@ -156,13 +161,13 @@ export default function AdminReviewsPage() {
                             className="btn btn-sm btn-success"
                             onClick={() => handleApprove(review.id)}
                           >
-                            ✓ Approve
+                            <FaCheck className="me-1" /> Approve
                           </button>
                           <button
                             className="btn btn-sm btn-danger"
                             onClick={() => handleReject(review.id)}
                           >
-                            ✕ Reject
+                            <FaTimes className="me-1" /> Reject
                           </button>
                         </div>
                       )}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllUsers, deleteUser } from '../../services/api';
+import { FaUsers, FaUser } from 'react-icons/fa';
 
 export default function AdminUsersPage() {
   const navigate = useNavigate();
@@ -34,8 +35,8 @@ export default function AdminUsersPage() {
   };
 
   const filteredUsers = users.filter(user =>
-    (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     user.email?.toLowerCase().includes(searchTerm.toLowerCase()))
+  (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleDeleteUser = async (userId, userName) => {
@@ -50,15 +51,15 @@ export default function AdminUsersPage() {
     } catch (err) {
       console.error('Error deleting user:', err);
       console.error('Error response:', err.response);
-      
+
       // Extract error message from response
       let errorMessage = 'Unknown error occurred';
-      
+
       if (err.response) {
         // Backend returns error message as string in response.data
         if (typeof err.response.data === 'string') {
           errorMessage = err.response.data;
-        } 
+        }
         // Handle JSON object response
         else if (err.response.data && typeof err.response.data === 'object') {
           errorMessage = err.response.data.message || err.response.data.error || JSON.stringify(err.response.data);
@@ -70,7 +71,7 @@ export default function AdminUsersPage() {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       alert('Failed to delete user:\n' + errorMessage);
     }
   };
@@ -87,7 +88,7 @@ export default function AdminUsersPage() {
 
   return (
     <div>
-      <h1 className="fw-bold mb-4">👥 Manage Users</h1>
+      <h1 className="fw-bold mb-4"><FaUsers className="me-2 text-primary" /> Manage Users</h1>
 
       {/* Search Bar */}
       <div className="card shadow-sm border-0 mb-4">
@@ -145,7 +146,7 @@ export default function AdminUsersPage() {
                           <td>
                             <div className="d-flex align-items-center">
                               <div className="bg-light rounded-circle p-2 me-2">
-                                👤
+                                <FaUser className="text-secondary" />
                               </div>
                               <strong>{user.name || 'Unknown'}</strong>
                             </div>
@@ -153,16 +154,15 @@ export default function AdminUsersPage() {
                           <td>{user.email || 'N/A'}</td>
                           <td>{user.phoneNo || 'N/A'}</td>
                           <td>
-                            <span className={`badge ${
-                              user.role?.toUpperCase() === 'ADMIN' ? 'bg-danger' :
-                              user.role?.toUpperCase() === 'VENDOR' ? 'bg-info' : 'bg-primary'
-                            }`}>
+                            <span className={`badge ${user.role?.toUpperCase() === 'ADMIN' ? 'bg-danger' :
+                                user.role?.toUpperCase() === 'VENDOR' ? 'bg-info' : 'bg-primary'
+                              }`}>
                               {user.role || 'CUSTOMER'}
                             </span>
                           </td>
                           <td>
                             <div className="d-flex gap-2">
-                              <button 
+                              <button
                                 className="btn btn-sm btn-outline-secondary"
                                 onClick={() => handleViewUser(user)}
                               >
@@ -234,10 +234,9 @@ export default function AdminUsersPage() {
                         <tr>
                           <th>Role:</th>
                           <td>
-                            <span className={`badge ${
-                              selectedUser.role?.toUpperCase() === 'ADMIN' ? 'bg-danger' :
-                              selectedUser.role?.toUpperCase() === 'VENDOR' ? 'bg-info' : 'bg-primary'
-                            }`}>
+                            <span className={`badge ${selectedUser.role?.toUpperCase() === 'ADMIN' ? 'bg-danger' :
+                                selectedUser.role?.toUpperCase() === 'VENDOR' ? 'bg-info' : 'bg-primary'
+                              }`}>
                               {selectedUser.role || 'CUSTOMER'}
                             </span>
                           </td>

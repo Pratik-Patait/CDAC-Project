@@ -26,6 +26,7 @@ api.interceptors.request.use(
 // Auth
 export const signup = (userData) => api.post("/auth/register", userData);
 export const login = (loginData) => api.post("/auth/login", loginData);
+export const submitContactForm = (contactData) => api.post("/contact", contactData);
 
 // Users
 export const getMyProfile = () => api.get("/users/profile");

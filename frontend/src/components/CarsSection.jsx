@@ -8,14 +8,14 @@ const getImagePath = (imageUrl, make, model) => {
   if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
     return imageUrl;
   }
-  
+
   // If imageUrl is provided (just filename), use it
   if (imageUrl) {
     // Remove any leading slashes
     const cleanUrl = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
     return `/vehicle-images/${cleanUrl}`;
   }
-  
+
   // Fallback: Try to match based on make/model
   const makeModel = `${make || ''}${model || ''}`.toLowerCase();
   const imageMap = {
@@ -28,14 +28,14 @@ const getImagePath = (imageUrl, make, model) => {
     'tatanexon': '/vehicle-images/Nexon.jpg',
     'marutimaruti': '/vehicle-images/Maruti.jpg'
   };
-  
+
   // Try to find matching image
   for (const [key, path] of Object.entries(imageMap)) {
     if (makeModel.includes(key.replace(/\s+/g, ''))) {
       return path;
     }
   }
-  
+
   // Final fallback
   return '/vehicle-images/Accord.jpg';
 };
@@ -65,7 +65,14 @@ export default function CarsSection() {
         brand: vehicle.make,
         make: vehicle.make,
         model: vehicle.model,
-        type: "Sedan", // Default, can be enhanced later
+        type: (() => {
+          const name = `${vehicle.make} ${vehicle.model}`.toLowerCase();
+          if (name.includes('xuv') || name.includes('fortuner') || name.includes('creta') || name.includes('nexon') || name.includes('scorpio') || name.includes('harrier') || name.includes('thar')) return "SUV";
+          if (name.includes('swift') || name.includes('i20') || name.includes('baleno') || name.includes('alto') || name.includes('tiago')) return "Hatchback";
+          if (name.includes('ertiga') || name.includes('innova') || name.includes('triber')) return "SUV"; // or MPV, but user filter has SUV
+          if (name.includes('city') || name.includes('verna') || name.includes('ciaz') || name.includes('dzire') || name.includes('accord') || name.includes('civic')) return "Sedan";
+          return "Sedan"; // Default
+        })(),
         seats: vehicle.seatingCapacity,
         seatingCapacity: vehicle.seatingCapacity,
         fuel: vehicle.fuelType,
@@ -76,6 +83,7 @@ export default function CarsSection() {
         pricePerDay: vehicle.pricePerDay,
         img: getImagePath(vehicle.imageUrl, vehicle.make, vehicle.model),
         imageUrl: vehicle.imageUrl,
+        vendorId: vehicle.vendorId, // Crucial for vendor logic
         year: vehicle.year,
         color: vehicle.color,
         description: vehicle.description,
@@ -97,19 +105,19 @@ export default function CarsSection() {
   const filteredCars = vehicles.filter(car => {
     // Type filter (can be enhanced when vehicle type is added to backend)
     // if (filterType !== "All" && car.type !== filterType) return false;
-    
+
     // Fuel filter
     if (filterFuel !== "All" && car.fuel.toUpperCase() !== filterFuel.toUpperCase()) return false;
-    
+
     // Transmission filter
     if (filterTransmission !== "All" && car.transmission.toUpperCase() !== filterTransmission.toUpperCase()) return false;
-    
+
     // Seats filter
     if (filterSeats !== "All" && car.seats !== parseInt(filterSeats)) return false;
-    
+
     // Price filter
     if (car.basePricePerDay > maxPrice) return false;
-    
+
     return true;
   });
 
@@ -139,16 +147,16 @@ export default function CarsSection() {
     <section id="cars" className="py-5">
       <div className="container">
         <h2 className="mb-4 fw-bold">Find Your Perfect Car</h2>
-        
+
         {/* Location and Filters Section */}
         <div className="card bg-light p-4 mb-5">
           <h5 className="mb-3 fw-bold">Search & Filter Options</h5>
-          
+
           {/* Location Input */}
           <div className="row mb-3">
             <div className="col-12 col-md-6">
               <label className="form-label fw-bold">Pick-up Location</label>
-              <select 
+              <select
                 className="form-select form-select-lg"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -172,7 +180,7 @@ export default function CarsSection() {
             {/* Car Type Filter */}
             <div className="col-12 col-md-6 col-lg-3">
               <label className="form-label fw-bold">Car Type</label>
-              <select 
+              <select
                 className="form-select"
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
@@ -187,7 +195,7 @@ export default function CarsSection() {
             {/* Fuel Type Filter */}
             <div className="col-12 col-md-6 col-lg-3">
               <label className="form-label fw-bold">Fuel Type</label>
-              <select 
+              <select
                 className="form-select"
                 value={filterFuel}
                 onChange={(e) => setFilterFuel(e.target.value)}
@@ -203,7 +211,7 @@ export default function CarsSection() {
             {/* Transmission Filter */}
             <div className="col-12 col-md-6 col-lg-3">
               <label className="form-label fw-bold">Transmission</label>
-              <select 
+              <select
                 className="form-select"
                 value={filterTransmission}
                 onChange={(e) => setFilterTransmission(e.target.value)}
@@ -217,7 +225,7 @@ export default function CarsSection() {
             {/* Seats Filter */}
             <div className="col-12 col-md-6 col-lg-3">
               <label className="form-label fw-bold">Seats</label>
-              <select 
+              <select
                 className="form-select"
                 value={filterSeats}
                 onChange={(e) => setFilterSeats(e.target.value)}
@@ -233,8 +241,8 @@ export default function CarsSection() {
           <div className="row g-3 mt-2">
             <div className="col-12 col-md-6">
               <label className="form-label fw-bold">Max Price per Day: ₹{maxPrice}</label>
-              <input 
-                type="range" 
+              <input
+                type="range"
                 className="form-range"
                 min="1000"
                 max="10000"
@@ -247,7 +255,7 @@ export default function CarsSection() {
 
             {/* Reset Button */}
             <div className="col-12 col-md-6 d-flex align-items-end">
-              <button 
+              <button
                 className="btn btn-outline-secondary w-100"
                 onClick={resetFilters}
               >
@@ -260,7 +268,7 @@ export default function CarsSection() {
         {/* Results Count */}
         <div className="mb-3">
           <p className="text-muted">
-            Showing <strong>{filteredCars.length}</strong> car(s) 
+            Showing <strong>{filteredCars.length}</strong> car(s)
             {location && ` in ${location}`}
           </p>
         </div>

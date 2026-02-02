@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getRevenueReport, getBookingAnalytics, getVehiclePerformance, getUserAnalytics } from '../../services/api';
+import { FaChartLine, FaStar } from 'react-icons/fa';
 
 const COLORS = ['#0d6efd', '#198754', '#ffc107', '#0dcaf0', '#dc3545', '#6f42c1'];
 
@@ -82,7 +83,7 @@ export default function AdminReportsPage() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="fw-bold mb-0">📈 Reports & Analytics</h1>
+        <h1 className="fw-bold mb-0"><FaChartLine className="me-2 text-primary" /> Reports & Analytics</h1>
         <div>
           <button
             className={`btn me-2 ${period === 'month' ? 'btn-primary' : 'btn-outline-secondary'}`}
@@ -151,7 +152,7 @@ export default function AdminReportsPage() {
             <div className="card-body">
               <div className="d-flex align-items-end mb-4 gap-3">
                 <h2 className="mb-0 fw-bold text-success">
-                  ₹{period === 'month' 
+                  ₹{period === 'month'
                     ? revenueData?.monthlyRevenue?.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || '0'
                     : revenueData?.yearlyRevenue?.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || '0'}
                 </h2>
@@ -319,8 +320,8 @@ export default function AdminReportsPage() {
                       ₹{vehicle.totalRevenue?.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || '0'} Revenue
                     </small>
                     {vehicle.averageRating > 0 && (
-                      <small className="text-warning">
-                        ⭐ {vehicle.averageRating.toFixed(1)}
+                      <small className="text-warning d-flex align-items-center">
+                        <FaStar className="me-1" /> {vehicle.averageRating.toFixed(1)}
                       </small>
                     )}
                   </div>

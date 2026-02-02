@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllBookings } from '../../services/api';
+import { FaClipboardList } from 'react-icons/fa';
 
 export default function AdminBookingsPage() {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ export default function AdminBookingsPage() {
 
   return (
     <div>
-      <h1 className="fw-bold mb-4">📋 Manage Bookings</h1>
+      <h1 className="fw-bold mb-4"><FaClipboardList className="me-2 text-primary" /> Manage Bookings</h1>
 
       {/* Status Tabs */}
       <ul className="nav nav-tabs mb-4">
@@ -78,11 +79,11 @@ export default function AdminBookingsPage() {
               className={`nav-link ${activeTab === tab ? 'active fw-bold' : ''}`}
               onClick={() => setActiveTab(tab)}
             >
-              {tab === 'PENDING' ? 'Pending' : 
-               tab === 'CONFIRMED' ? 'Confirmed' : 
-               tab === 'COMPLETED' ? 'Completed' : 
-               tab === 'CANCELLED' ? 'Cancelled' : 
-               tab === 'ACTIVE' ? 'Active' : tab}
+              {tab === 'PENDING' ? 'Pending' :
+                tab === 'CONFIRMED' ? 'Confirmed' :
+                  tab === 'COMPLETED' ? 'Completed' :
+                    tab === 'CANCELLED' ? 'Cancelled' :
+                      tab === 'ACTIVE' ? 'Active' : tab}
               {tab !== 'All' && (
                 <span className="badge bg-secondary ms-2">
                   {bookings.filter(b => b.status === tab).length}
@@ -154,7 +155,7 @@ export default function AdminBookingsPage() {
                             <td><strong>₹{booking.totalAmount?.toLocaleString() || '0'}</strong></td>
                             <td>{getStatusBadge(booking.status)}</td>
                             <td>
-                              <button 
+                              <button
                                 className="btn btn-sm btn-outline-secondary"
                                 onClick={() => handleViewDetails(booking)}
                               >

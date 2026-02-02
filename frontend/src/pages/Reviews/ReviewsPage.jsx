@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { createReview, getReviewsByVehicleId } from '../../services/api';
 import { useAuth } from '../../context';
+import { FaStar, FaRegStar } from 'react-icons/fa';
 
 export default function ReviewsPage() {
   const { vehicleId } = useParams();
@@ -36,7 +37,7 @@ export default function ReviewsPage() {
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-    
+
     if (!user) {
       alert('Please log in to submit a review');
       navigate('/login');
@@ -68,15 +69,19 @@ export default function ReviewsPage() {
   };
 
   const renderStars = (rating) => {
-    return '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
+    return [...Array(5)].map((_, i) => (
+      <span key={i}>
+        {i < rating ? <FaStar /> : <FaRegStar />}
+      </span>
+    ));
   };
 
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="fw-bold mb-0">⭐ Reviews</h1>
+        <h1 className="fw-bold mb-0"><FaStar className="me-2 text-warning" /> Reviews</h1>
         {user && (
-          <button 
+          <button
             className="btn btn-primary"
             onClick={() => setShowReviewForm(!showReviewForm)}
           >
@@ -101,11 +106,11 @@ export default function ReviewsPage() {
                   onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) })}
                   required
                 >
-                  <option value={5}>5 ⭐⭐⭐⭐⭐</option>
-                  <option value={4}>4 ⭐⭐⭐⭐</option>
-                  <option value={3}>3 ⭐⭐⭐</option>
-                  <option value={2}>2 ⭐⭐</option>
-                  <option value={1}>1 ⭐</option>
+                  <option value={5}>5 Stars - Excellent</option>
+                  <option value={4}>4 Stars - Very Good</option>
+                  <option value={3}>3 Stars - Good</option>
+                  <option value={2}>2 Stars - Fair</option>
+                  <option value={1}>1 Star - Poor</option>
                 </select>
               </div>
               <div className="mb-3">

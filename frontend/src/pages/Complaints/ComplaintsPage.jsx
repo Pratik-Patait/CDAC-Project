@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createComplaint, getUserComplaints } from '../../services/api';
+import { FaClipboardList } from 'react-icons/fa';
 import { useAuth } from '../../context';
 
 export default function ComplaintsPage() {
@@ -47,7 +48,7 @@ export default function ComplaintsPage() {
         subject: formData.subject,
         description: formData.description
       };
-      
+
       if (formData.bookingId) {
         complaintData.bookingId = parseInt(formData.bookingId);
       }
@@ -87,8 +88,8 @@ export default function ComplaintsPage() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="fw-bold mb-0">📝 My Complaints</h1>
-        <button 
+        <h1 className="fw-bold mb-0"><FaClipboardList className="me-2 text-primary" /> My Complaints</h1>
+        <button
           className="btn btn-primary"
           onClick={() => setShowForm(!showForm)}
         >

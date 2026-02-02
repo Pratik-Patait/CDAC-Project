@@ -1,107 +1,11 @@
 import { useState, useEffect } from 'react'
 import { getVendorBookings } from '../../services/api'
 
+import { FaStar } from 'react-icons/fa'
 export default function VendorBookings() {
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
-  const [originalBookings] = useState([
-    {
-      id: 'BK001',
-      customer: 'Rajesh Kumar',
-      email: 'rajesh@example.com',
-      phone: '+91 98765 43210',
-      carName: 'Maruti Swift',
-      carId: 'CAR001',
-      pickupDate: '2025-12-08',
-      returnDate: '2025-12-10',
-      pickupLocation: 'Mumbai Central',
-      returnLocation: 'Mumbai Central',
-      status: 'Active',
-      amount: 3500,
-      days: 2,
-      rating: 5
-    },
-    {
-      id: 'BK002',
-      customer: 'Priya Singh',
-      email: 'priya@example.com',
-      phone: '+91 98765 43211',
-      carName: 'Honda Accord',
-      carId: 'CAR002',
-      pickupDate: '2025-12-09',
-      returnDate: '2025-12-11',
-      pickupLocation: 'Mumbai Airport',
-      returnLocation: 'Mumbai Central',
-      status: 'Pending',
-      amount: 5000,
-      days: 2,
-      rating: null
-    },
-    {
-      id: 'BK003',
-      customer: 'Amit Patel',
-      email: 'amit@example.com',
-      phone: '+91 98765 43212',
-      carName: 'Mahindra XUV500',
-      carId: 'CAR003',
-      pickupDate: '2025-12-06',
-      returnDate: '2025-12-08',
-      pickupLocation: 'Mumbai Central',
-      returnLocation: 'Mumbai Central',
-      status: 'Completed',
-      amount: 7500,
-      days: 2,
-      rating: 4.5
-    },
-    {
-      id: 'BK004',
-      customer: 'Neha Sharma',
-      email: 'neha@example.com',
-      phone: '+91 98765 43213',
-      carName: 'Tata Nexon',
-      carId: 'CAR004',
-      pickupDate: '2025-12-07',
-      returnDate: '2025-12-09',
-      pickupLocation: 'Mumbai Airport',
-      returnLocation: 'Mumbai Airport',
-      status: 'Completed',
-      amount: 4500,
-      days: 2,
-      rating: 4
-    },
-    {
-      id: 'BK005',
-      customer: 'Vikas Reddy',
-      email: 'vikas@example.com',
-      phone: '+91 98765 43214',
-      carName: 'Maruti Swift',
-      carId: 'CAR001',
-      pickupDate: '2025-12-05',
-      returnDate: '2025-12-07',
-      pickupLocation: 'Mumbai Central',
-      returnLocation: 'Pune',
-      status: 'Cancelled',
-      amount: 2500,
-      days: 2,
-      rating: null
-    },
-    {
-      id: 'BK006',
-      customer: 'Sneha Desai',
-      email: 'sneha@example.com',
-      phone: '+91 98765 43215',
-      carName: 'Honda Accord',
-      carId: 'CAR002',
-      pickupDate: '2025-12-10',
-      returnDate: '2025-12-13',
-      pickupLocation: 'Mumbai Central',
-      returnLocation: 'Mumbai Central',
-      status: 'Confirmed',
-      amount: 6500,
-      days: 3,
-      rating: null
-    }
-  ])
+
 
   useEffect(() => {
     fetchBookings()
@@ -125,8 +29,8 @@ export default function VendorBookings() {
 
   const statuses = ['All', 'PENDING', 'CONFIRMED', 'ACTIVE', 'COMPLETED', 'CANCELLED']
 
-  const filteredBookings = filteredStatus === 'All' 
-    ? bookings 
+  const filteredBookings = filteredStatus === 'All'
+    ? bookings
     : bookings.filter(b => b.status === filteredStatus)
 
   // Helper to map backend status to display status
@@ -142,7 +46,7 @@ export default function VendorBookings() {
   }
 
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'ACTIVE': return 'bg-primary'
       case 'PENDING': return 'bg-warning text-dark'
       case 'CONFIRMED': return 'bg-info'
@@ -156,7 +60,7 @@ export default function VendorBookings() {
     if (!rating) return <small className="text-muted">Not rated</small>
     return (
       <div>
-        <span className="text-warning">★</span> {rating}/5
+        <span className="text-warning"><FaStar /></span> {rating}/5
       </div>
     )
   }
@@ -176,8 +80,8 @@ export default function VendorBookings() {
             >
               {status}
               <span className="filter-count">
-                {status === 'All' 
-                  ? bookings.length 
+                {status === 'All'
+                  ? bookings.length
                   : bookings.filter(b => b.status === status).length
                 }
               </span>
@@ -253,7 +157,7 @@ export default function VendorBookings() {
                       </div>
 
                       <div className="booking-card-footer">
-                        <button 
+                        <button
                           className="btn btn-sm btn-primary"
                           onClick={() => setSelectedBooking(booking)}
                         >
@@ -310,7 +214,7 @@ export default function VendorBookings() {
                       <td>{booking.vehicleMake} {booking.vehicleModel}</td>
                       <td>
                         <small>
-                          {new Date(booking.pickupDate).toLocaleDateString()} <br/> {new Date(booking.returnDate).toLocaleDateString()}
+                          {new Date(booking.pickupDate).toLocaleDateString()} <br /> {new Date(booking.returnDate).toLocaleDateString()}
                         </small>
                       </td>
                       <td><strong>{days}</strong></td>
@@ -321,7 +225,7 @@ export default function VendorBookings() {
                         </span>
                       </td>
                       <td>
-                        <button 
+                        <button
                           className="btn btn-sm btn-outline-primary"
                           onClick={() => setSelectedBooking(booking)}
                         >
@@ -343,7 +247,7 @@ export default function VendorBookings() {
           <div className="vendor-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h5>Booking Details - {selectedBooking.id}</h5>
-              <button 
+              <button
                 className="btn-close"
                 onClick={() => setSelectedBooking(null)}
               ></button>
@@ -434,7 +338,7 @@ export default function VendorBookings() {
                   <h6 className="section-title">Customer Feedback</h6>
                   <div className="feedback-box">
                     <p className="mb-2">
-                      <strong>Rating:</strong> ⭐ {selectedBooking.rating}/5
+                      <strong>Rating:</strong> <FaStar className="text-warning" /> {selectedBooking.rating}/5
                     </p>
                     <p className="text-muted">Great service! Will book again.</p>
                   </div>
@@ -442,7 +346,7 @@ export default function VendorBookings() {
               )}
             </div>
             <div className="modal-footer">
-              <button 
+              <button
                 className="btn btn-secondary"
                 onClick={() => setSelectedBooking(null)}
               >
